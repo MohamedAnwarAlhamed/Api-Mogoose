@@ -9,6 +9,7 @@ const Product = require("../models/product");
 router.get("/", (req, res, next) => {
   Order.find()
     .select("product quantity _id")
+    .populate('product', 'name')
     .exec()
     .then(docs => {
       res.status(200).json({
@@ -42,7 +43,7 @@ router.post("/", (req, res, next) => {
         });
       }
       const order = new Order({
-        _id: mongoose.Types.ObjectId(),
+        _id: new mongoose.Types.ObjectId(),
         quantity: req.body.quantity,
         product: req.body.productId
       });
@@ -73,6 +74,7 @@ router.post("/", (req, res, next) => {
 
 router.get("/:orderId", (req, res, next) => {
   Order.findById(req.params.orderId)
+    .populate('product')
     .exec()
     .then(order => {
       if (!order) {
@@ -96,7 +98,7 @@ router.get("/:orderId", (req, res, next) => {
 });
 
 router.delete("/:orderId", (req, res, next) => {
-  Order.deleteOne({ _id: req.params.orderId })
+  Order.remove({ _id: req.params.orderId })
     .exec()
     .then(result => {
       res.status(200).json({
